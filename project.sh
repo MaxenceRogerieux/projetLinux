@@ -12,10 +12,10 @@
 
 #while read : execution a chaque ligne ; -r : text brut sans interpretation des \ par exemple
 tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
-    #username="$NAME"
-    username=${NAME:0:1}$(echo "$SURNAME" | sed 's/ //g')
+    username=${NAME:0:1}$(echo "$SURNAME")
+    username=echo "username | tr -d ' ' | tr -d '\n'"
     echo "$username"
-    #sudo adduser 
+    #sudo adduser $username
     #echo "$NAME $SURNAME $MAIL $PASSWORD"
 done
 
