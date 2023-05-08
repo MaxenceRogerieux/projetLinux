@@ -1,7 +1,23 @@
 #!/bin/bash
 
-#awk -F ';' '{ print $1 " " $2 " " $3 " " $4 }' "accounts.csv" > parsed.txt
-
+# Définir la liste des utilisateurs à supprimer
+sudo userdel -r -f EWeatherwax
+sudo userdel -r -f GOgg
+sudo userdel -r -f ANitt
+sudo userdel -r -f TAching
+sudo userdel -r -f MStoHelit
+sudo userdel -r -f YStoHelit
+sudo userdel -r -f SStoHelit
+sudo userdel -r -f HVetinari
+sudo userdel -r -f LofQuirm
+sudo userdel -r -f SVimes
+sudo userdel -r -f CIronfoundersson
+sudo userdel -r -f AvonUberwald
+sudo userdel -r -f FColon
+sudo userdel -r -f NNobbs
+sudo userdel -r -f MRidcullus
+sudo userdel -r -f PStibbons
+sudo userdel -r -f SRamkin
 
 #awf (data file parsing) : -F -> field separator ; NR>1 : row>1 ; $1 : column 1
 
@@ -15,8 +31,17 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
     username=${NAME:0:1}$(echo "$SURNAME") # prend la premiere lettre du prenom et le nom
     username=$(echo "$username" | sed -e 's/[[:space:]]//g') # supprime les ' '
     username=$(echo "$username" | sed -e 's/\r//g') # supprime les \n
-    #username=echo "username | tr -d ' ' | tr -d '\n'"
-    sudo useradd -m $username #-m pour créer dossier /hom auto
-    #echo "$NAME $SURNAME $MAIL $PASSWORD"
+    
+    #echo $username
+
+    mdp=$(echo "$PASSWORD" | sed -e 's/\r//g') # supprime les \n
+    
+    echo $mdp
+
+    #sudo useradd -m $username #-m pour créer dossier /hom auto
+    
+    #echo -e "$mdp\n$mdp" | passwd $username
 done
 
+#sudo useradd -m EWeatherwax
+#echo -e "{S7?U-4}FF\n{S7?U-4}FF" | passwd $username
