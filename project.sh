@@ -1,26 +1,35 @@
 #!/bin/bash
 
-# Définir la liste des utilisateurs à supprimer
-sudo userdel -r -f EWeatherwax
-sudo userdel -r -f GOgg
-sudo userdel -r -f ANitt
-sudo userdel -r -f TAching
-sudo userdel -r -f MStoHelit
-sudo userdel -r -f YStoHelit
-sudo userdel -r -f SStoHelit
-sudo userdel -r -f HVetinari
-sudo userdel -r -f LofQuirm
-sudo userdel -r -f SVimes
-sudo userdel -r -f CIronfoundersson
-sudo userdel -r -f AvonUberwald
-sudo userdel -r -f FColon
-sudo userdel -r -f NNobbs
-sudo userdel -r -f MRidcullus
-sudo userdel -r -f PStibbons
-sudo userdel -r -f SRamkin
+select="Choisissez une option : " # définit le prompt pour select
+options=("Delete previous users" "Create users") # liste des options
+
+select choix in "${options[@]}"
+do
+  case $choix in
+    "Delete previous users")
+      echo "Vous avez choisi 'Delete previous users'"
+      choice=1
+      break
+      ;;
+    "Create users")
+      echo "Vous avez choisi 'Create users'"
+      choice=2
+      break
+      ;;
+    "Quitter")
+      break # quitte la boucle select et termine le script
+      ;;
+    *)
+      echo "Option invalide"
+      ;;
+  esac
+done
+
 
 #Variables
 #smtp://$usermail:$pass;auth=mech,...@host:$port;$params
+
+#declare -a userList=()
 file="accounts.csv"
 Luser="mroger25"
 Lpass="Isen44N"
@@ -41,7 +50,7 @@ SSH_KEY="/home/$Luser/.ssh/id_rsa"
 SMTP_COMMAND='mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "From:$usermail" mael.grellier-neau@isen-ouest.yncrea.fr <<< "Hello World"'
 
 # Commande fonctionnelle pour envoie mail
-ssh -i /home/mroger25/.ssh/id_rsa $SSH_USER@$SSH_HOST 'mail --subject "Test" --exec "set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:1016AgRv;auth=LOGIN@smtp.office365.com:587" --append "From:maxence.rogerieux@isen-ouest.yncrea.fr" maxence.rogerieux@isen-ouest.yncrea.fr <<< "Hello World"'
+#ssh -i /home/mroger25/.ssh/id_rsa mroger25@10.30.48.100 'mail --subject "Test" --exec "set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:1016AgRv;auth=LOGIN@smtp.office365.com:587" --append "From:maxence.rogerieux@isen-ouest.yncrea.fr" maxence.rogerieux@isen-ouest.yncrea.fr <<< "Hello World"'
 
 #ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "echo '$SMTP_COMMAND' | nc localhost 25"
 
@@ -58,21 +67,53 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
     username=$(echo "$username" | sed -e 's/[[:space:]]//g') # supprime les ' '
     
     #echo $username
+    userList+=("$username")
 
-    mdp=${PASSWORD::-2}  # supprime les \n
-    
+    mdp=${PASSWORD::-2} #supprime les \n
     #echo $mdp
 
-    sudo useradd -m $username #-m pour créer dossier /hom auto
+    if [ $choice == 1 ]
+    then
+        userdel -r -f $username
+    fi
+
+    if [ $choice == 2 ]
+    then
+
+        useradd -m $username #-m pour créer dossier /hom auto
+        
+        echo -e "${PASSWORD::-2}\n${PASSWORD::-2}" | passwd "$username" #création du mdp
+        chage -d 0 $username #expiration du mdp
+
+        #mkdir /home/$username/a_sauver #création d'un dossier a_sauver par user
+
+        #mail --subject "<subject>" --exec "set sendmail=<smtp-url>" --append "From:<sender-email>" <reciever-email> <<< "<body>"
+    fi
     
-    echo -e "${PASSWORD::-2}\n${PASSWORD::-2}" | passwd "$username" #création du mdp
-    sudo chage -d 0 $username #expiration du mdp
-
-    mkdir /home/$username/a_sauver #création d'un dossier a_sauver par user
-
-    mail --subject "<subject>" --exec "set sendmail=<smtp-url>" --append "From:<sender-email>" <reciever-email> <<< "<body>"
-
     
 done
 
+#read -ap $userList
 #Sauvergarde
+for users in "${userList[*]}"
+do
+    echo $users
+done
+
+for (( i=0; i < ${#tab[*]}; i++ )); do
+    echo ${tab[i]}
+done
+
+
+#for users in userList
+#do
+    #Répertoire à sauvegarder
+    #BACKUP_DIR="/home/$users/a_sauver"
+
+    #Nom et l'emplacement du fichier de sauvegarde
+    #BACKUP_FILE="$SSH_USER@$SSH_HOST:/home/saves/save_$username.tgz"
+
+
+
+    #ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "tar -czvf - $BACKUP_DIR" > $BACKUP_FILE
+#done
