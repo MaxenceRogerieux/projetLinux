@@ -30,17 +30,17 @@ sudo userdel -r -f SRamkin
 tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
     username=${NAME:0:1}$(echo "$SURNAME") # prend la premiere lettre du prenom et le nom
     username=$(echo "$username" | sed -e 's/[[:space:]]//g') # supprime les ' '
-    username=$(echo "$username" | sed -e 's/\r//g') # supprime les \n
     
     #echo $username
 
-    mdp=$(echo "$PASSWORD" | sed -e 's/\r//g') # supprime les \n
+    mdp=${PASSWORD::-2}  # supprime les \n
     
     echo $mdp
 
-    #sudo useradd -m $username #-m pour créer dossier /hom auto
+    sudo useradd -m $username #-m pour créer dossier /hom auto
     
-    #echo -e "$mdp\n$mdp" | passwd $username
+    echo -e "${PASSWORD::-2}\n${PASSWORD::-2}" | passwd "$username"
+
 done
 
 #sudo useradd -m EWeatherwax
