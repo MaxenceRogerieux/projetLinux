@@ -35,12 +35,15 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
 
     mdp=${PASSWORD::-2}  # supprime les \n
     
-    echo $mdp
+    #echo $mdp
 
     sudo useradd -m $username #-m pour créer dossier /hom auto
     
     echo -e "${PASSWORD::-2}\n${PASSWORD::-2}" | passwd "$username"
 
+    sudo chage -d 0 $username
+
+    mkdir /home/$username/a_sauver
 done
 
 #sudo useradd -m EWeatherwax
