@@ -19,6 +19,32 @@ sudo userdel -r -f MRidcullus
 sudo userdel -r -f PStibbons
 sudo userdel -r -f SRamkin
 
+#Variables
+#smtp://$usermail:$pass;auth=mech,...@host:$port;$params
+file="accounts.csv"
+Luser="mroger25"
+Lpass="Isen44N"
+usermail="maxence.rogerieux%40isen-ouest.yncrea.fr"
+pass="1016AgRv"
+smtpUrl="smtp://$usermail:$pass;auth=LOGIN@smtp.office365.com:587"
+
+#mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "From:$usermail" $mail <<< "Hello World"
+
+#mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "From:$usermail" mael.grellier-neau@isen-ouest.yncrea.fr <<< "Hello World"
+
+#mail --subject "Ceci est un test" --exec "set sendmail=smtp://mael.grellier-neau%40isen-ouest.yncrea.fr:68Mgn04N*;auth=LOGIN@smtp.office365.com:587" --append "From:mael.grellier-neau@isen-ouest.yncrea.fr" mael.grelneau@gmail.com <<< "<body>"
+
+#Variables SSH
+SSH_HOST="10.30.48.100"
+SSH_USER="mroger25"
+SSH_KEY="/home/$Luser/.ssh/id_rsa"
+SMTP_COMMAND='mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "From:$usermail" mael.grellier-neau@isen-ouest.yncrea.fr <<< "Hello World"'
+
+# Commande fonctionnelle pour envoie mail
+ssh -i /home/mroger25/.ssh/id_rsa $SSH_USER@$SSH_HOST 'mail --subject "Test" --exec "set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:1016AgRv;auth=LOGIN@smtp.office365.com:587" --append "From:maxence.rogerieux@isen-ouest.yncrea.fr" maxence.rogerieux@isen-ouest.yncrea.fr <<< "Hello World"'
+
+#ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "echo '$SMTP_COMMAND' | nc localhost 25"
+
 #awf (data file parsing) : -F -> field separator ; NR>1 : row>1 ; $1 : column 1
 
 #awk -F ';' 'NR>1 {print $1}' "accounts.csv" > names.txt
@@ -39,12 +65,14 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
 
     sudo useradd -m $username #-m pour créer dossier /hom auto
     
-    echo -e "${PASSWORD::-2}\n${PASSWORD::-2}" | passwd "$username"
+    echo -e "${PASSWORD::-2}\n${PASSWORD::-2}" | passwd "$username" #création du mdp
+    sudo chage -d 0 $username #expiration du mdp
 
-    sudo chage -d 0 $username
+    mkdir /home/$username/a_sauver #création d'un dossier a_sauver par user
 
-    mkdir /home/$username/a_sauver
+    mail --subject "<subject>" --exec "set sendmail=<smtp-url>" --append "From:<sender-email>" <reciever-email> <<< "<body>"
+
+    
 done
 
-#sudo useradd -m EWeatherwax
-#echo -e "{S7?U-4}FF\n{S7?U-4}FF" | passwd $username
+#Sauvergarde
