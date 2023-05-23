@@ -52,6 +52,11 @@ SMTP_COMMAND='mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "Fro
 
 #ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "echo '$SMTP_COMMAND' | nc localhost 25"
 
+# Instalation de Eclipse en local :
+        wget https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2023-03/R/eclipse-java-2023-03-R-linux-gtk-x86_64.tar.gz
+        tar -xzf eclipse-java-2023-03-R-linux-gtk-x86_64.tar.gz
+
+
 # while read : execution a chaque ligne ; -r : text brut sans interpretation des \ par exemple
 tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
     username=${NAME:0:1}$(echo "$SURNAME") # prend la premiere lettre du prenom et le nom
@@ -79,22 +84,27 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
         # mkdir /home/$username/a_sauver #création d'un dossier a_sauver par user
 
         # mail --subject "<subject>" --exec "set sendmail=<smtp-url>" --append "From:<sender-email>" <reciever-email> <<< "<body>"
+    
+        #lien symbolique vers eclipse pour chaque user
+        mkdir /home/$username/eclipse
+        ln -s eclipse-installer /home/$username/eclipse
     fi
-
-    # Sauvergarde
+    
     
 
+    # Sauvergarde
+
     # Définir le répertoire à sauvegarder
-    #BACKUP_DIR="/home/$username/a_sauver"
+    BACKUP_DIR="/home/$username/a_sauver"
 
     # Nom et l'emplacement du fichier de sauvegarde
-    #BACKUP_FILE="$SSH_USER@$SSH_HOST:/home/saves/save_$username.tgz"
+    BACKUP_FILE="$SSH_USER@$SSH_HOST:/home/saves/save_$username.tgz"
 
 
     #(crontab -l && echo "* * * * 1-5 echo 'hello'") | crontab -
     #0 23 * * 1-5
 
-    #CronCommand="ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "tar -czvf - $BACKUP_DIR" > $BACKUP_FILE"
+    CronCommand="ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "tar -czvf - $BACKUP_DIR" > $BACKUP_FILE"
 
     #Répertoire à sauvegarder
 
