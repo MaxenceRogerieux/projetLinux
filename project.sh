@@ -48,7 +48,7 @@ SSH_KEY="/home/$Luser/.ssh/id_rsa"
 SMTP_COMMAND='mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "From:$usermail" mael.grellier-neau@isen-ouest.yncrea.fr <<< "Hello World"'
 
 # Commande fonctionnelle pour envoie mail
-#ssh -i /home/mroger25/.ssh/id_rsa mroger25@10.30.48.100 'mail --subject "Test" --exec "set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:1016AgRv;auth=LOGIN@smtp.office365.com:587" --append "From:maxence.rogerieux@isen-ouest.yncrea.fr" maxence.rogerieux@isen-ouest.yncrea.fr <<< "Hello World"'
+ssh -i /home/mroger25/.ssh/id_rsa mroger25@10.30.48.100 'mail --subject "Test" --exec "set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:1016AgRv;auth=LOGIN@smtp.office365.com:587" --append "From:maxence.rogerieux@isen-ouest.yncrea.fr" maxence.rogerieux@isen-ouest.yncrea.fr <<< "Hello World"'
 
 #ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "echo '$SMTP_COMMAND' | nc localhost 25"
 
@@ -109,9 +109,14 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
 done
 
 #(crontab -l && echo '* * * * 1-5 touch bonjour.txt') | crontab -
-#service cron start
+service cron start
+
+> /etc/crontab
+> /var/spool/cron/isen
+> crontab
 
 #0 23 * * 1-5
+cmd="touch /home/bjr.txt"
 
 #write out current crontab
 crontab -l > mycron
@@ -120,3 +125,22 @@ echo "* * * * * touch /home/bjr.txt" >> mycron
 #install new cron file
 crontab mycron
 rm mycron
+
+
+
+
+#alias projet="cd /mnt/c/Users/maxou/'OneDrive - yncréa'/Documents/ISEN/'CIR 3'/'Admin Linux'/projetLinux/"
+
+#regex expression starting with 'a' followed by twice the same char and ending with 'e'
+#grep -E '^a(.)\1e$' accounts.csv
+#quelle est la différence entre grep et egrep ? grep -E = egrep
+#A quoi correspond le -E de grep ? extended regex 
+#ufw -> firewall
+
+#Quelle est la commande awk permettant d’afficher le login des personnes ayant été inscrite après 2020 et dont l’identifiant commence par 9 dans le fichier profil.
+#awk -F: '$1 ~ /^9/ && $5 > 2020 {print $1}' profil
+#et uniquement sur les 3 dernieres lignes ?
+#awk -F: '$1 ~ /^9/ && $5 > 2020 {print $1}' profil | tail -n 3
+#sans utiliser tial ?
+#awk -F: '$1 ~ /^9/ && $5 > 2020 {print $1}' profil | awk 'NR > 3'
+#create a 
