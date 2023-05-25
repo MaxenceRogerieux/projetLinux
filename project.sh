@@ -136,10 +136,10 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
 
         mkdir /home/$username/a_sauver #création d'un dossier a_sauver par user
 
-        # Définir le répertoire à sauvegarder
+        # Répertoire à sauvegarder
         BACKUP_DIR="/home/$username/a_sauver"
         BACKUP_NAME="save_$username.tgz"
-        # Nom et l'emplacement du fichier de sauvegarde
+        # Emplacement du fichier de sauvegarde
         BACKUP_FILE="/home/saves"
 
         #-------------------------------------------------------------#
@@ -156,3 +156,7 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
         rm mycron
     fi
 done
+
+  #-------------------------------------------------------------#
+  #----------------------  Fin  --------------------------------#
+  #-------------------------------------------------------------#
