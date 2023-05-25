@@ -59,10 +59,6 @@ SMTP_COMMAND='mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "Fro
 # Commande fonctionnelle pour envoie mail
 #ssh -i /home/mroger25/.ssh/id_rsa mroger25@10.30.48.100 'mail --subject "Test" --exec "set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:1016AgRv;auth=LOGIN@smtp.office365.com:587" --append "From:maxence.rogerieux@isen-ouest.yncrea.fr" maxence.rogerieux@isen-ouest.yncrea.fr <<< "Hello World"'
 
-#$para_serv=smtp.office365.com:587
-#$para_login=maxence.rogerieux@isen-ouest.yncrea.fr
-#$para_mdp=1016AgRv
-
 #ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "echo '$SMTP_COMMAND' | nc localhost 25"
 
 # Instalation de Eclipse en local :
@@ -88,20 +84,23 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
 
     if [ $choice == 2 ]
     then
+        #-------------------------------------------------------------#
+        #----------------------  Création du compte  -----------------#
+        #-------------------------------------------------------------#
 
         useradd -m $username #-m pour créer dossier /home auto
         
         echo -e "${PASSWORD::-2}\n${PASSWORD::-2}" | passwd "$username" #création du mdp
-        chage -d 0 $username #expiration du mdp
+        chage -d 0 $username #expiration du mdp à la première connexion
 
-        # mkdir /home/$username/a_sauver #création d'un dossier a_sauver par user
+        #-------------------------------------------------------------#
+        #----------------------  Mail  -------------------------------#
+        #-------------------------------------------------------------#
 
-        # mail --subject "<subject>" --exec "set sendmail=<smtp-url>" --append "From:<sender-email>" <reciever-email> <<< "<body>"
-    
-        #lien symbolique vers eclipse pour chaque user
-        #ln -s eclipse /home/$username/eclipse
-        
-        ssh -n -i /home/isen/.ssh/id_rsa mroger25@10.30.48.100 "mail --subject \"Test\" --exec \"set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:1016AgRv;auth=LOGIN@smtp.office365.com:587\" --append \"From:$para_login\" mael.bordillon@isen-ouest.yncrea.fr <<< \"
+        login=$(echo "$para_login" | sed -e 's/@/%40/g') # remplace @ par %40 pour le mail
+
+        # mail
+        ssh -n -i /home/isen/.ssh/id_rsa mroger25@10.30.48.100 "mail --subject \"Premiere connexion aux services\" --exec \"set sendmail=smtp://$login:$para_mdp;auth=LOGIN@$para_serv\" --append \"From:$para_login\" $para_login <<< \"
         Bonjour $NAME $SURNAME,
 
         Voici vos identifiants pour vous connecter à votre compte :
@@ -109,56 +108,53 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
         Login : $username
         Mot de passe : $mdp
 
+        Vous devrez changer votre mot de passe à la première connexion.
+
         Cordialement,
 
         L'équipe informatique de l'ISEN Yncréa Ouest
         \""
+
+        # parametres d'entrée :
+        #$para_serv=smtp.office365.com:587
+        #$para_login=maxence.rogerieux@isen-ouest.yncrea.fr
+        #$para_mdp=1016AgRv
+
+        #-------------------------------------------------------------#
+        #----------------------  Eclipse  ----------------------------#
+        #-------------------------------------------------------------#
+        
+        #lien symbolique vers eclipse pour chaque user
+        ln -s eclipse /home/$username/eclipse
+        
+        #-------------------------------------------------------------#
+        #----------------------  Sauvegarde  -------------------------#
+        #-------------------------------------------------------------#
+
+        # mkdir /home/$username/a_sauver #création d'un dossier a_sauver par user
+
+        # Définir le répertoire à sauvegarder
+        BACKUP_DIR="/home/$username/a_sauver"
+
+        # Nom et l'emplacement du fichier de sauvegarde
+        BACKUP_FILE="$SSH_USER@$SSH_HOST:/home/saves/save_$username.tgz"
+
+        #(crontab -l && echo "* * * * 1-5 echo 'hello'") | crontab -
+        #0 23 * * 1-5
+
+        cmd="touch /home/bjr.txt"
+        #cmd="echo hello world"
+
+        #CronCommand="ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "tar -czvf - $BACKUP_DIR" > $BACKUP_FILE"
+
+        #crontab -r
+        #crontab -l > mycron
+        #echo new cron into cron file
+        #echo "* * * * * $cmd" >> mycron
+        #crontab mycron
+        #rm mycron
     fi
-    
-    # mail
-
-    body_mail="Bonjour $NAME $SURNAME,
-    Voici vos identifiants pour vous connecter à votre compte :
-    Login : $username
-    Mot de passe : $mdp\n\nCordialement,
-    L'équipe informatique de l'ISEN Yncréa Ouest"
-
-    
-
-    mail="hello"
-
-    #ssh -i /home/mroger25/.ssh/id_rsa mroger25@10.30.48.100 'mail --subject "Test" --exec "set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:$para_mdp;auth=LOGIN@$para_serv" --append "From:$para_login" $para_login <<< $body_mail'
-
-    
-
-
-
-    # Sauvergarde
-
-    # Définir le répertoire à sauvegarder
-    BACKUP_DIR="/home/$username/a_sauver"
-
-    # Nom et l'emplacement du fichier de sauvegarde
-    BACKUP_FILE="$SSH_USER@$SSH_HOST:/home/saves/save_$username.tgz"
-
-    #(crontab -l && echo "* * * * 1-5 echo 'hello'") | crontab -
-    #0 23 * * 1-5
-
-    cmd="touch /home/bjr.txt"
-    #cmd="echo hello world"
-
-    #CronCommand="ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "tar -czvf - $BACKUP_DIR" > $BACKUP_FILE"
-
-    #crontab -r
-    #crontab -l > mycron
-    #echo new cron into cron file
-    #echo "* * * * * $cmd" >> mycron
-    #crontab mycron
-    #rm mycron
 done
-
-#crontab -r
-
 
 #0 23 * * 1-5
 #crontab -l > mycron
