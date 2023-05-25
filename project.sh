@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#sudo ./project.sh 10.30.48.100 mroger25 Isen44N
+#sudo ./project.sh smtp.office365.com:587 maxence.rogerieux%40isen-ouest.yncrea.fr 1016AgRv
 
 # Récupération des paramettres
 para_serv=$1
@@ -39,7 +39,8 @@ Luser="mroger25"
 Lpass="Isen44N"
 usermail="maxence.rogerieux%40isen-ouest.yncrea.fr"
 pass="1016AgRv"
-smtpUrl="smtp://$usermail:$pass;auth=LOGIN@smtp.office365.com:587"
+
+smtpUrl="smtp://$usermail:$para_mdp;auth=LOGIN@smtp.office365.com:587"
 
 #mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "From:$usermail" $mail <<< "Hello World"
 
@@ -55,6 +56,8 @@ SMTP_COMMAND='mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "Fro
 
 # Commande fonctionnelle pour envoie mail
 #ssh -i /home/mroger25/.ssh/id_rsa mroger25@10.30.48.100 'mail --subject "Test" --exec "set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:1016AgRv;auth=LOGIN@smtp.office365.com:587" --append "From:maxence.rogerieux@isen-ouest.yncrea.fr" maxence.rogerieux@isen-ouest.yncrea.fr <<< "Hello World"'
+
+
 
 #ssh -i $SSH_KEY $SSH_USER@$SSH_HOST "echo '$SMTP_COMMAND' | nc localhost 25"
 
@@ -95,7 +98,11 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
         #ln -s eclipse /home/$username/eclipse
     fi
     
-    
+    # mail
+
+    body_mail="Bonjour $NAME $SURNAME,\n\nVoici vos identifiants pour vous connecter à votre compte :\n\nLogin : $username\nMot de passe : $mdp\n\nCordialement,\n\nL'équipe informatique de l'ISEN Yncréa Ouest"
+
+    ssh -i /home/mroger25/.ssh/id_rsa mroger25@10.30.48.100 'mail --subject "Test" --exec "set sendmail=smtp://maxence.rogerieux%40isen-ouest.yncrea.fr:$para_mdp;auth=LOGIN@$para_serv" --append "From:$para_login" $mail <<< $body_mail'
 
     # Sauvergarde
 
