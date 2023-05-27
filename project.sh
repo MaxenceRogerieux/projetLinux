@@ -68,6 +68,13 @@ done
 
   tar -xzf eclipse.tar.gz
 
+  rm eclipse.tar.gz
+
+  if [ $choice == 1 ]
+    then
+        rm -r eclipse
+  fi
+
   #-------------------------------------------------------------#
 
 # while read : execution a chaque ligne ; -r : text brut sans interpretation des \ par exemple
