@@ -58,23 +58,7 @@ do
       ;;
   esac
 done
-
-  #-------------------------------------------------------------#
-  #----------------------  Eclipse  ----------------------------#
-  #-------------------------------------------------------------#
-
-# Instalation de Eclipse en local :
-  wget "https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2023-03/R/eclipse-java-2023-03-R-linux-gtk-x86_64.tar.gz&r=1" -O eclipse.tar.gz
-
-  tar -xzf eclipse.tar.gz
-
-  rm eclipse.tar.gz
-
-  if [ $choice == 1 ]
-    then
-        rm -r eclipse
-  fi
-
+ 
   #-------------------------------------------------------------#
 
 # while read : execution a chaque ligne ; -r : text brut sans interpretation des \ par exemple
@@ -110,20 +94,20 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
 
         login=$(echo "$para_login" | sed -e 's/@/%40/g') # remplace @ par %40 pour le mail
 
-        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "mail --subject \"Premiere connexion aux services\" --exec \"set sendmail=smtp://$login:$para_mdp;auth=LOGIN@$para_serv\" --append \"From:$para_login\" $MAIL <<< \"
-        Bonjour $NAME $SURNAME,
+        #ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "mail --subject \"Premiere connexion aux services\" --exec \"set sendmail=smtp://$login:$para_mdp;auth=LOGIN@$para_serv\" --append \"From:$para_login\" $MAIL <<< \"
+        # Bonjour $NAME $SURNAME,
 
-        Voici vos identifiants pour vous connecter à votre compte :
+        # Voici vos identifiants pour vous connecter à votre compte :
         
-        Login : $username
-        Mot de passe : $mdp
+        # Login : $username
+        # Mot de passe : $mdp
 
-        Vous devrez changer votre mot de passe à la première connexion.
+        # Vous devrez changer votre mot de passe à la première connexion.
 
-        Cordialement,
+        # Cordialement,
 
-        L'équipe informatique de l'ISEN Yncréa Ouest
-        \""
+        # L'équipe informatique de l'ISEN Yncréa Ouest
+        # \""
 
         # parametres d'entrée :
         #$para_serv=smtp.office365.com:587
@@ -154,15 +138,63 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
         crontab -l > mycron
         echo "new cron into cron file"
 
-        echo "0 23 * * 1-5 tar -czvf $BACKUP_NAME $BACKUP_DIR" >> mycron
-        echo "0 23 * * 1-5 scp -i /home/isen/.ssh/id_rsa $BACKUP_NAME $SSH_USER@$SSH_HOST:$BACKUP_FILE" >> mycron
-        echo "0 23 * * 1-5 rm $BACKUP_NAME" >> mycron
+        echo "0 23 * * 1-5 tar -czvf $BACKUP_NAME $BACKUP_DIR && scp -i /home/isen/.ssh/id_rsa $BACKUP_NAME $SSH_USER@$SSH_HOST:$BACKUP_FILE && rm $BACKUP_NAME" >> mycron
         echo "" >> mycron
 
         crontab mycron
         rm mycron
     fi
 done
+
+if [ $choice == 1 ]
+  then
+  #----------------------  eclipse  ------------------------#
+      rm -r eclipse
+
+  #----------------------  sauvegarde  ---------------------#
+      rm retablir_sauvegarde.sh
+fi
+
+if [ $choice == 2 ]
+  then
+#       # Instalation de Eclipse en local :
+        
+#       wget "https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2023-03/R/eclipse-java-2023-03-R-linux-gtk-x86_64.tar.gz&r=1" -O eclipse.tar.gz
+
+#       tar -xzf eclipse.tar.gz
+#       rm -r eclipse.tar.gz
+
+
+        rm retablir_sauvegarde.sh
+        touch retablir_sauvegarde.sh
+
+        #ecrire ligne par ligne le script dans le fichier
+        echo "#!/bin/bash" >> retablir_sauvegarde.sh
+        echo "" >> retablir_sauvegarde.sh
+        echo "user=\$1" >> retablir_sauvegarde.sh
+        echo "" >> retablir_sauvegarde.sh
+        echo "# Variables SSH" >> retablir_sauvegarde.sh
+        echo "SSH_HOST=\"10.30.48.100\"" >> retablir_sauvegarde.sh
+        echo "SSH_USER=\"mroger25\"" >> retablir_sauvegarde.sh
+        echo "" >> retablir_sauvegarde.sh
+        echo "# Emplacement du fichier de sauvegarde" >> retablir_sauvegarde.sh
+        echo "BACKUP_FILE=\"/home/saves\"" >> retablir_sauvegarde.sh
+        echo "# Répertoire de sauvegarde" >> retablir_sauvegarde.sh
+        echo "BACKUP_DIR=\"\$SSH_USER@\$SSH_HOST:\$BACKUP_FILE\"" >> retablir_sauvegarde.sh
+        echo "# Emplacement du fichier de sauvegarde" >> retablir_sauvegarde.sh
+        echo "BACKUP_NAME=\"/home/\$user/a_sauver\"" >> retablir_sauvegarde.sh
+        echo "" >> retablir_sauvegarde.sh
+        echo "rm -r /home/\$user/a_sauver" >> retablir_sauvegarde.sh
+        echo "" >> retablir_sauvegarde.sh
+        echo "scp -i /home/isen/.ssh/id_rsa \$BACKUP_DIR \$BACKUP_NAME" >> retablir_sauvegarde.sh
+
+
+        # Activation de pare-feu
+        apt install ufw -y
+        ufw enable
+        ufw deny ftp
+        ufw deny proto udp from any to any
+fi
 
   #-------------------------------------------------------------#
   #----------------------  Fin  --------------------------------#
