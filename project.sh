@@ -72,6 +72,8 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
     mdp=${PASSWORD::-2} #supprime les \n
     # echo $mdp
 
+    #filtrer les \n
+
     if [ $choice == 1 ]
     then
         userdel -r -f $username
@@ -92,6 +94,7 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
         #----------------------  Mail  -------------------------------#
         #-------------------------------------------------------------#
 
+
         login=$(echo "$para_login" | sed -e 's/@/%40/g') # remplace @ par %40 pour le mail
 
         #ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "mail --subject \"Premiere connexion aux services\" --exec \"set sendmail=smtp://$login:$para_mdp;auth=LOGIN@$para_serv\" --append \"From:$para_login\" $MAIL <<< \"
@@ -108,11 +111,6 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
 
         # L'équipe informatique de l'ISEN Yncréa Ouest
         # \""
-
-        # parametres d'entrée :
-        #$para_serv=smtp.office365.com:587
-        #$para_login=maxence.rogerieux@isen-ouest.yncrea.fr
-        #$para_mdp=1016AgRv
 
         #-------------------------------------------------------------#
         #----------------------  Eclipse  ----------------------------#
@@ -194,6 +192,14 @@ if [ $choice == 2 ]
         ufw enable
         ufw deny ftp
         ufw deny proto udp from any to any
+
+        # Nextcloud
+        apt install snapd -y
+        apt install core
+        snap install nextcloud
+
+        #
+
 fi
 
   #-------------------------------------------------------------#
