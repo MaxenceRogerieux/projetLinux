@@ -80,6 +80,7 @@ if [ $choice == 2 ]
 
       rm /home/retablir_sauvegarde.sh
       touch /home/retablir_sauvegarde.sh
+      chmod 755 /home/retablir_sauvegarde.sh
 
       #ecrire ligne par ligne le script dans le fichier
       echo "#!/bin/bash" >> /home/retablir_sauvegarde.sh
@@ -177,7 +178,7 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; 
 
         login=$(echo "$para_login" | sed -e 's/@/%40/g') # remplace @ par %40 pour le mail
 
-        #ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "mail --subject \"Premiere connexion aux services\" --exec \"set sendmail=smtp://$login:$para_mdp;auth=LOGIN@$para_serv\" --append \"From:$para_login\" $MAIL <<< \"
+        # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "mail --subject \"Premiere connexion aux services\" --exec \"set sendmail=smtp://$login:$para_mdp;auth=LOGIN@$para_serv\" --append \"From:$para_login\" $MAIL <<< \"
         # Bonjour $NAME $SURNAME,
 
         # Voici vos identifiants pour vous connecter à votre compte :
@@ -229,13 +230,11 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; 
         #-------------------------------------------------------------#
         #----------------------  Nextcloud  --------------------------#
         #-------------------------------------------------------------#
-        export OC_PASS=$password
-        /snap/bin/nextcloud.occ user:add --password-from-env --display-name="$NAME $SURNAME" $username
+        # export OC_PASS=$password
+        # /snap/bin/nextcloud.occ user:add --password-from-env --display-name="$NAME $SURNAME" $username
 
     fi
 done
-
-
 
   #-------------------------------------------------------------#
   #----------------------  Fin  --------------------------------#
