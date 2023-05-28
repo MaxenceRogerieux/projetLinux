@@ -218,7 +218,15 @@ if [ $choice == 2 ]
         echo "#!/bin/bash" >> /home/tunnel_nextcloud
         echo "ssh -L 4242:$SSH_HOST:80 $SSH_USER@$SSH_HOST" >> /home/tunnel_nextcloud
 
-        #
+        # Monitoring
+        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --nightly-channel --claim-token Dopn1McgKewN7ujssSf_S2DUuPznAndemJHJq8PYRIRGDrvOweT-GykC683plF7dRHYVacZREDopC7h895ehdqZOvzCW-hinZRCWNyXVYB8RAvRLmwX2JIOChEADDn7TsHRzkoA --claim-rooms 8584a810-d8f2-45de-aa16-deea77daec0a --claim-url https://app.netdata.cloud"
+
+        #Tunnel du monitoring
+        touch /home/tunnel_monitoring
+        chmod 755 /home/tunnel_monitoring
+        echo "#!/bin/bash" >> /home/tunnel_monitoring
+        echo "ssh -L 19999:$SSH_HOST:19999 $SSH_USER@$SSH_HOST" >> /home/tunnel_monitoring
+        
 
 fi
 
