@@ -4,9 +4,8 @@
   #----------------------  Notes  ------------------------------#
   #-------------------------------------------------------------#
 
-#sudo ./project.sh smtp.office365.com:587 maxence.rogerieux@isen-ouest.yncrea.fr 1016AgRv
-
-#alias projet="cd /mnt/c/Users/maxou/'OneDrive - yncréa'/Documents/ISEN/'CIR 3'/'Admin Linux'/projetLinux/"
+# Pour lancer le script : sudo ./project.sh <adresse smtp> <login> <mdp>
+# exemple : sudo ./project.sh smtp.office365.com:587 maxence.rogerieux@isen-ouest.yncrea.fr fakepasswd
 
   #-------------------------------------------------------------#
   #----------------------  Script  -----------------------------#
@@ -59,7 +58,88 @@ do
   esac
 done
  
-  #-------------------------------------------------------------#
+#-------------------------------------------------------------#
+
+if [ $choice == 1 ]
+  then
+  #----------------------  eclipse  ------------------------#
+      rm -r eclipse
+
+  #----------------------  sauvegarde  ---------------------#
+      rm /home/retablir_sauvegarde.sh
+fi
+
+if [ $choice == 2 ]
+  then
+      # Instalation de Eclipse en local :
+      wget "https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2023-03/R/eclipse-java-2023-03-R-linux-gtk-x86_64.tar.gz&r=1" -O eclipse.tar.gz
+
+      tar -xzf eclipse.tar.gz
+      rm -r eclipse.tar.gz
+
+
+      rm /home/retablir_sauvegarde.sh
+      touch /home/retablir_sauvegarde.sh
+
+      #ecrire ligne par ligne le script dans le fichier
+      echo "#!/bin/bash" >> /home/retablir_sauvegarde.sh
+      echo "" >> /home/retablir_sauvegarde.sh
+      echo "user=\$1" >> /home/retablir_sauvegarde.sh
+      echo "" >> /home/retablir_sauvegarde.sh
+      echo "# Variables SSH" >> /home/retablir_sauvegarde.sh
+      echo "SSH_HOST=\"10.30.48.100\"" >> /home/retablir_sauvegarde.sh
+      echo "SSH_USER=\"mroger25\"" >> /home/retablir_sauvegarde.sh
+      echo "" >> /home/retablir_sauvegarde.sh
+      echo "# Emplacement du fichier de sauvegarde" >> /home/retablir_sauvegarde.sh
+      echo "BACKUP_FILE=\"/home/saves\"" >> /home/retablir_sauvegarde.sh
+      echo "# Répertoire de sauvegarde" >> /home/retablir_sauvegarde.sh
+      echo "BACKUP_DIR=\"\$SSH_USER@\$SSH_HOST:\$BACKUP_FILE\"" >> /home/retablir_sauvegarde.sh
+      echo "# Emplacement du fichier de sauvegarde" >> /home/retablir_sauvegarde.sh
+      echo "BACKUP_NAME=\"/home/\$user/a_sauver\"" >> /home/retablir_sauvegarde.sh
+      echo "" >> /home/retablir_sauvegarde.sh
+      echo "rm -r /home/\$user/a_sauver" >> /home/retablir_sauvegarde.sh
+      echo "" >> /home/retablir_sauvegarde.sh
+      echo "scp -i /home/isen/.ssh/id_rsa \$BACKUP_DIR \$BACKUP_NAME" >> /home/retablir_sauvegarde.sh
+
+
+      # Activation de pare-feu
+      apt install ufw -y
+      ufw enable
+      ufw deny ftp
+      ufw deny proto udp from any to any
+
+      # Nextcloud
+      NXC_LOGIN="nextcloud-admin"
+      NXC_PASSWD="N3x+ClOuD"
+
+      # Installation de snapd et nextcloud
+      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "apt install snapd -y"
+      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install core"
+      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install nextcloud"
+      
+      # Configuration de nextcloud
+      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "/snap/bin/nextcloud.manual-install $NXC_LOGIN $NXC_PASSWD"
+
+      #Tunnel du serveur nextcloud
+      touch /home/tunnel_nextcloud
+      chmod 755 /home/tunnel_nextcloud
+      echo "#!/bin/bash" >> /home/tunnel_nextcloud
+      echo "ssh -L 4242:$SSH_HOST:80 $SSH_USER@$SSH_HOST" >> /home/tunnel_nextcloud
+
+
+      # Monitoring
+      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --nightly-channel --claim-token Dopn1McgKewN7ujssSf_S2DUuPznAndemJHJq8PYRIRGDrvOweT-GykC683plF7dRHYVacZREDopC7h895ehdqZOvzCW-hinZRCWNyXVYB8RAvRLmwX2JIOChEADDn7TsHRzkoA --claim-rooms 8584a810-d8f2-45de-aa16-deea77daec0a --claim-url https://app.netdata.cloud"
+
+      #Tunnel du monitoring
+      touch /home/tunnel_monitoring
+      chmod 755 /home/tunnel_monitoring
+      echo "#!/bin/bash" >> /home/tunnel_monitoring
+      echo "ssh -L 19999:$SSH_HOST:19999 $SSH_USER@$SSH_HOST" >> /home/tunnel_monitoring
+      
+fi
+
+
+#-------------------------------------------------------------#
 
 # while read : execution a chaque ligne ; -r : text brut sans interpretation des \ par exemple
 tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; do
@@ -117,8 +197,12 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; 
         #-------------------------------------------------------------#
         
         #lien symbolique vers eclipse pour chaque user
-        ln -s eclipse/eclipse /home/$username/eclipse
-        
+        if [ ! -f "/home/$username/eclipse" ]; 
+        then
+            ln -s eclipse/eclipse /home/$username/eclipse
+        fi
+
+
         #-------------------------------------------------------------#
         #----------------------  Sauvegarde  -------------------------#
         #-------------------------------------------------------------#
@@ -151,84 +235,7 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; 
     fi
 done
 
-if [ $choice == 1 ]
-  then
-  #----------------------  eclipse  ------------------------#
-      rm -r eclipse
 
-  #----------------------  sauvegarde  ---------------------#
-      rm /home/retablir_sauvegarde.sh
-fi
-
-if [ $choice == 2 ]
-  then
-#       # Instalation de Eclipse en local :
-        
-#       wget "https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2023-03/R/eclipse-java-2023-03-R-linux-gtk-x86_64.tar.gz&r=1" -O eclipse.tar.gz
-
-#       tar -xzf eclipse.tar.gz
-#       rm -r eclipse.tar.gz
-
-
-        rm /home/retablir_sauvegarde.sh
-        touch /home/retablir_sauvegarde.sh
-
-        #ecrire ligne par ligne le script dans le fichier
-        echo "#!/bin/bash" >> /home/retablir_sauvegarde.sh
-        echo "" >> /home/retablir_sauvegarde.sh
-        echo "user=\$1" >> /home/retablir_sauvegarde.sh
-        echo "" >> /home/retablir_sauvegarde.sh
-        echo "# Variables SSH" >> /home/retablir_sauvegarde.sh
-        echo "SSH_HOST=\"10.30.48.100\"" >> /home/retablir_sauvegarde.sh
-        echo "SSH_USER=\"mroger25\"" >> /home/retablir_sauvegarde.sh
-        echo "" >> /home/retablir_sauvegarde.sh
-        echo "# Emplacement du fichier de sauvegarde" >> /home/retablir_sauvegarde.sh
-        echo "BACKUP_FILE=\"/home/saves\"" >> /home/retablir_sauvegarde.sh
-        echo "# Répertoire de sauvegarde" >> /home/retablir_sauvegarde.sh
-        echo "BACKUP_DIR=\"\$SSH_USER@\$SSH_HOST:\$BACKUP_FILE\"" >> /home/retablir_sauvegarde.sh
-        echo "# Emplacement du fichier de sauvegarde" >> /home/retablir_sauvegarde.sh
-        echo "BACKUP_NAME=\"/home/\$user/a_sauver\"" >> /home/retablir_sauvegarde.sh
-        echo "" >> /home/retablir_sauvegarde.sh
-        echo "rm -r /home/\$user/a_sauver" >> /home/retablir_sauvegarde.sh
-        echo "" >> /home/retablir_sauvegarde.sh
-        echo "scp -i /home/isen/.ssh/id_rsa \$BACKUP_DIR \$BACKUP_NAME" >> /home/retablir_sauvegarde.sh
-
-
-        # Activation de pare-feu
-        apt install ufw -y
-        ufw enable
-        ufw deny ftp
-        ufw deny proto udp from any to any
-
-        # Nextcloud
-        NXC_LOGIN="nextcloud-admin"
-        NXC_PASSWD="N3x+ClOuD"
-
-        #Installation de snapd et nextcloud
-        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "apt install snapd -y"
-        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install core"
-        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install nextcloud"
-        
-        #Configuration de nextcloud
-        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "/snap/bin/nextcloud.manual-install $NXC_LOGIN $NXC_PASSWD"
-
-        #Tunnel du serveur nextcloud
-        touch /home/tunnel_nextcloud
-        chmod 755 /home/tunnel_nextcloud
-        echo "#!/bin/bash" >> /home/tunnel_nextcloud
-        echo "ssh -L 4242:$SSH_HOST:80 $SSH_USER@$SSH_HOST" >> /home/tunnel_nextcloud
-
-        # Monitoring
-        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --nightly-channel --claim-token Dopn1McgKewN7ujssSf_S2DUuPznAndemJHJq8PYRIRGDrvOweT-GykC683plF7dRHYVacZREDopC7h895ehdqZOvzCW-hinZRCWNyXVYB8RAvRLmwX2JIOChEADDn7TsHRzkoA --claim-rooms 8584a810-d8f2-45de-aa16-deea77daec0a --claim-url https://app.netdata.cloud"
-
-        #Tunnel du monitoring
-        touch /home/tunnel_monitoring
-        chmod 755 /home/tunnel_monitoring
-        echo "#!/bin/bash" >> /home/tunnel_monitoring
-        echo "ssh -L 19999:$SSH_HOST:19999 $SSH_USER@$SSH_HOST" >> /home/tunnel_monitoring
-        
-
-fi
 
   #-------------------------------------------------------------#
   #----------------------  Fin  --------------------------------#
