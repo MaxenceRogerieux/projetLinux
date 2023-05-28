@@ -87,7 +87,7 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; 
 
         useradd -m $username #-m pour créer dossier /home auto
         
-        echo -e "${PASSWORD::-2}\n${PASSWORD::-2}" | passwd "$username" #création du mdp
+        echo -e "$mdp\n$mdp" | passwd "$username" #création du mdp
         chage -d 0 $username #expiration du mdp à la première connexion
 
         #-------------------------------------------------------------#
@@ -141,6 +141,13 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; 
 
         crontab mycron
         rm mycron
+
+        #-------------------------------------------------------------#
+        #----------------------  Nextcloud  --------------------------#
+        #-------------------------------------------------------------#
+        export OC_PASS=$password
+        /snap/bin/nextcloud.occ user:add --password-from-env --display-name="$NAME $SURNAME" $username
+
     fi
 done
 
@@ -194,9 +201,22 @@ if [ $choice == 2 ]
         ufw deny proto udp from any to any
 
         # Nextcloud
-        apt install snapd -y
-        snap install core
-        snap install nextcloud
+        NXC_LOGIN="nextcloud-admin"
+        NXC_PASSWD="N3x+ClOuD"
+
+        #Installation de snapd et nextcloud
+        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "apt install snapd -y"
+        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install core"
+        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install nextcloud"
+        
+        #Configuration de nextcloud
+        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "/snap/bin/nextcloud.manual-install $NXC_LOGIN $NXC_PASSWD"
+
+        #Tunnel du serveur nextcloud
+        touch /home/tunnel_nextcloud
+        chmod 755 /home/tunnel_nextcloud
+        echo "#!/bin/bash" >> /home/tunnel_nextcloud
+        echo "ssh -L 4242:$SSH_HOST:80 $SSH_USER@$SSH_HOST" >> /home/tunnel_nextcloud
 
         #
 
