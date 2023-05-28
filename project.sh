@@ -62,14 +62,14 @@ done
   #-------------------------------------------------------------#
 
 # while read : execution a chaque ligne ; -r : text brut sans interpretation des \ par exemple
-tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
+tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; do
     username=${NAME:0:1}$(echo "$SURNAME") # prend la premiere lettre du prenom et le nom
     username=$(echo "$username" | sed -e 's/[[:space:]]//g') # supprime les ' '
-    
+  
     # echo $username
     userList+=("$username")
 
-    mdp=${PASSWORD::-2} #supprime les \n
+    mdp=$(echo $PASSWORD_RAW | sed 's/\r$//' | sed 's/ $//') #supprime les retours à la ligne et espace dans le mot de passe
     # echo $mdp
 
     #filtrer les \n
@@ -117,7 +117,7 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD; do
         #-------------------------------------------------------------#
         
         #lien symbolique vers eclipse pour chaque user
-        ln -s eclipse /home/$username/eclipse
+        ln -s eclipse/eclipse /home/$username/eclipse
         
         #-------------------------------------------------------------#
         #----------------------  Sauvegarde  -------------------------#
@@ -150,7 +150,7 @@ if [ $choice == 1 ]
       rm -r eclipse
 
   #----------------------  sauvegarde  ---------------------#
-      rm retablir_sauvegarde.sh
+      rm /home/retablir_sauvegarde.sh
 fi
 
 if [ $choice == 2 ]
@@ -163,28 +163,28 @@ if [ $choice == 2 ]
 #       rm -r eclipse.tar.gz
 
 
-        rm retablir_sauvegarde.sh
-        touch retablir_sauvegarde.sh
+        rm /home/retablir_sauvegarde.sh
+        touch /home/retablir_sauvegarde.sh
 
         #ecrire ligne par ligne le script dans le fichier
-        echo "#!/bin/bash" >> retablir_sauvegarde.sh
-        echo "" >> retablir_sauvegarde.sh
-        echo "user=\$1" >> retablir_sauvegarde.sh
-        echo "" >> retablir_sauvegarde.sh
-        echo "# Variables SSH" >> retablir_sauvegarde.sh
-        echo "SSH_HOST=\"10.30.48.100\"" >> retablir_sauvegarde.sh
-        echo "SSH_USER=\"mroger25\"" >> retablir_sauvegarde.sh
-        echo "" >> retablir_sauvegarde.sh
-        echo "# Emplacement du fichier de sauvegarde" >> retablir_sauvegarde.sh
-        echo "BACKUP_FILE=\"/home/saves\"" >> retablir_sauvegarde.sh
-        echo "# Répertoire de sauvegarde" >> retablir_sauvegarde.sh
-        echo "BACKUP_DIR=\"\$SSH_USER@\$SSH_HOST:\$BACKUP_FILE\"" >> retablir_sauvegarde.sh
-        echo "# Emplacement du fichier de sauvegarde" >> retablir_sauvegarde.sh
-        echo "BACKUP_NAME=\"/home/\$user/a_sauver\"" >> retablir_sauvegarde.sh
-        echo "" >> retablir_sauvegarde.sh
-        echo "rm -r /home/\$user/a_sauver" >> retablir_sauvegarde.sh
-        echo "" >> retablir_sauvegarde.sh
-        echo "scp -i /home/isen/.ssh/id_rsa \$BACKUP_DIR \$BACKUP_NAME" >> retablir_sauvegarde.sh
+        echo "#!/bin/bash" >> /home/retablir_sauvegarde.sh
+        echo "" >> /home/retablir_sauvegarde.sh
+        echo "user=\$1" >> /home/retablir_sauvegarde.sh
+        echo "" >> /home/retablir_sauvegarde.sh
+        echo "# Variables SSH" >> /home/retablir_sauvegarde.sh
+        echo "SSH_HOST=\"10.30.48.100\"" >> /home/retablir_sauvegarde.sh
+        echo "SSH_USER=\"mroger25\"" >> /home/retablir_sauvegarde.sh
+        echo "" >> /home/retablir_sauvegarde.sh
+        echo "# Emplacement du fichier de sauvegarde" >> /home/retablir_sauvegarde.sh
+        echo "BACKUP_FILE=\"/home/saves\"" >> /home/retablir_sauvegarde.sh
+        echo "# Répertoire de sauvegarde" >> /home/retablir_sauvegarde.sh
+        echo "BACKUP_DIR=\"\$SSH_USER@\$SSH_HOST:\$BACKUP_FILE\"" >> /home/retablir_sauvegarde.sh
+        echo "# Emplacement du fichier de sauvegarde" >> /home/retablir_sauvegarde.sh
+        echo "BACKUP_NAME=\"/home/\$user/a_sauver\"" >> /home/retablir_sauvegarde.sh
+        echo "" >> /home/retablir_sauvegarde.sh
+        echo "rm -r /home/\$user/a_sauver" >> /home/retablir_sauvegarde.sh
+        echo "" >> /home/retablir_sauvegarde.sh
+        echo "scp -i /home/isen/.ssh/id_rsa \$BACKUP_DIR \$BACKUP_NAME" >> /home/retablir_sauvegarde.sh
 
 
         # Activation de pare-feu
@@ -195,7 +195,7 @@ if [ $choice == 2 ]
 
         # Nextcloud
         apt install snapd -y
-        apt install core
+        snap install core
         snap install nextcloud
 
         #
