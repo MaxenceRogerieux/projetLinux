@@ -28,7 +28,6 @@ SSH_HOST="10.30.48.100"
 SSH_USER="mroger25"
 
 SSH_KEY="/home/$Luser/.ssh/id_rsa"
-SMTP_COMMAND='mail --subject "Test" --exec "set sendmail=$smtpUrl" --append "From:$usermail" mael.grellier-neau@isen-ouest.yncrea.fr <<< "Hello World"'
 
   #-------------------------------------------------------------#
   #----------------------  Menu  -------------------------------#
@@ -114,12 +113,12 @@ if [ $choice == 2 ]
       NXC_PASSWD="N3x+ClOuD"
 
       # Installation de snapd et nextcloud
-      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "apt install snapd -y"
-      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install core"
-      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install nextcloud"
+      ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "apt install snapd -y"
+      ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install core"
+      ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "snap install nextcloud"
       
       # Configuration de nextcloud
-      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "/snap/bin/nextcloud.manual-install $NXC_LOGIN $NXC_PASSWD"
+      ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "/snap/bin/nextcloud.manual-install $NXC_LOGIN $NXC_PASSWD"
 
       #Tunnel du serveur nextcloud
       touch /home/tunnel_nextcloud
@@ -129,7 +128,7 @@ if [ $choice == 2 ]
 
 
       # Monitoring
-      # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --nightly-channel --claim-token Dopn1McgKewN7ujssSf_S2DUuPznAndemJHJq8PYRIRGDrvOweT-GykC683plF7dRHYVacZREDopC7h895ehdqZOvzCW-hinZRCWNyXVYB8RAvRLmwX2JIOChEADDn7TsHRzkoA --claim-rooms 8584a810-d8f2-45de-aa16-deea77daec0a --claim-url https://app.netdata.cloud"
+      ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "wget -O /tmp/netdata-kickstart.sh https://my-netdata.io/kickstart.sh && sh /tmp/netdata-kickstart.sh --nightly-channel --claim-token Dopn1McgKewN7ujssSf_S2DUuPznAndemJHJq8PYRIRGDrvOweT-GykC683plF7dRHYVacZREDopC7h895ehdqZOvzCW-hinZRCWNyXVYB8RAvRLmwX2JIOChEADDn7TsHRzkoA --claim-rooms 8584a810-d8f2-45de-aa16-deea77daec0a --claim-url https://app.netdata.cloud"
 
       #Tunnel du monitoring
       touch /home/tunnel_monitoring
@@ -178,20 +177,20 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; 
 
         login=$(echo "$para_login" | sed -e 's/@/%40/g') # remplace @ par %40 pour le mail
 
-        # ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "mail --subject \"Premiere connexion aux services\" --exec \"set sendmail=smtp://$login:$para_mdp;auth=LOGIN@$para_serv\" --append \"From:$para_login\" $MAIL <<< \"
-        # Bonjour $NAME $SURNAME,
+        ssh -n -i /home/isen/.ssh/id_rsa $SSH_USER@$SSH_HOST "mail --subject \"Premiere connexion aux services\" --exec \"set sendmail=smtp://$login:$para_mdp;auth=LOGIN@$para_serv\" --append \"From:$para_login\" $MAIL <<< \"
+        Bonjour $NAME $SURNAME,
 
-        # Voici vos identifiants pour vous connecter à votre compte :
+        Voici vos identifiants pour vous connecter à votre compte :
         
-        # Login : $username
-        # Mot de passe : $mdp
+        Login : $username
+        Mot de passe : $mdp
 
-        # Vous devrez changer votre mot de passe à la première connexion.
+        Vous devrez changer votre mot de passe à la première connexion.
 
-        # Cordialement,
+        Cordialement,
 
-        # L'équipe informatique de l'ISEN Yncréa Ouest
-        # \""
+        L'équipe informatique de l'ISEN Yncréa Ouest
+        \""
 
         #-------------------------------------------------------------#
         #----------------------  Eclipse  ----------------------------#
@@ -230,8 +229,8 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; 
         #-------------------------------------------------------------#
         #----------------------  Nextcloud  --------------------------#
         #-------------------------------------------------------------#
-        # export OC_PASS=$password
-        # /snap/bin/nextcloud.occ user:add --password-from-env --display-name="$NAME $SURNAME" $username
+        export OC_PASS=$password
+        /snap/bin/nextcloud.occ user:add --password-from-env --display-name="$NAME $SURNAME" $username
 
     fi
 done
