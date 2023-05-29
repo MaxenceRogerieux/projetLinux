@@ -152,8 +152,6 @@ tail -n +2 accounts.csv | while IFS=';' read -r NAME SURNAME MAIL PASSWORD_RAW; 
     mdp=$(echo $PASSWORD_RAW | sed 's/\r$//' | sed 's/ $//') #supprime les retours à la ligne et espace dans le mot de passe
     # echo $mdp
 
-    #filtrer les \n
-
     if [ $choice == 1 ]
     then
         userdel -r -f $username
